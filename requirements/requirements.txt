@@ -1,6 +1,5 @@
 # Base dependencies
 requests
-tarfile
 pathlib
 
 # Testing and reporting dependencies
