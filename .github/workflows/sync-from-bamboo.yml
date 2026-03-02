@@ -94,8 +94,7 @@ jobs:
       with:
         name: allure-reports
         path: allure-report/
-        retention-days: 30
-        
+        retention-days: 60
 
     - name: Deploy report to gh-pages
       uses: peaceiris/actions-gh-pages@v4
@@ -107,6 +106,10 @@ jobs:
         destination_dir: main
         keep_files: true
         force_orphan: false
+        
+    - name: Remove Build Files Pre-Commit 
+      run: |
+        rm -rf node-v24.12.0-linux-x64
         
     - name: Commit files
       uses: stefanzweifel/git-auto-commit-action@v5
