@@ -6,8 +6,8 @@ permissions:
 
 on:
   schedule:
-    # Run every 30 minutes
-    - cron: '*/30 * * * *'
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
   workflow_dispatch: # Allows manual trigger from UI
 
 jobs:
