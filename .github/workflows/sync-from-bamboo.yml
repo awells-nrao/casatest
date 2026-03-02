@@ -1,0 +1,113 @@
+name: Sync from Open-Bamboo
+
+# Grant write permission to the token so it can push commits
+permissions:
+  contents: write
+
+on:
+  schedule:
+    # Run every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # Allows manual trigger from UI
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install  dependencies
+      run: |
+        pwd
+        make build-deps
+
+    - name: Install Allure CLI
+      run: |
+        wget -qO- https://nodejs.org/dist/v24.12.0/node-v24.12.0-linux-x64.tar.xz | tar -xJ
+        export PATH=$HOME/node-v24.12.0-linux-x64/bin:$PATH
+        npm install -g allure@3.1.0
+        which allure
+        allure --version
+
+    - name: Fetch artifacts from Bamboo
+      run: |
+        python3 scripts/fetch_artifacts.py
+
+    - name: Unpack Allure Reports
+      run: |
+        working_directory=$(pwd)
+        history_file="$working_directory/output/casa-test-history.jsonl"
+        echo -e "{\n\"historyPath\": \"$history_file\",\n\"appendHistory\": true\n}" > config.json
+        cd results/
+        for projectkey in */; do
+            cd "$projectkey"
+            echo " "
+            echo "Processing directory: $projectkey"
+            for f in *.tar.gz; do
+                tar -xzf "$f"
+                cd nosedir/allure
+                allure results pack
+                allure results unpack
+                mkdir -p $working_directory/output/reports/$projectkey
+                cp -r allure-results "$working_directory/output/reports/$projectkey/"
+                cd $working_directory/results/$projectkey
+                rm -rf nosedir
+                rm -rf allure-results
+                rm -rf allure-results.zip
+                cd ..
+            done
+        done
+        cd $working_directory
+        cd output/reports
+        for dir in CASA-REMTA-* ; do
+            cd "Generating Sub Report for: $dir"
+            allure generate allure-results --output "$working_directory/output/allure-report/$dir" --config $working_directory/config.json
+            cd ..
+            latest_report="$working_directory/output/allure-report/$dir"
+        done
+        rm -rf $working_directory/allure-report/
+        echo "Latest report for: $working_directory/allure-report/"
+        mv $latest_report $working_directory/allure-report/
+        cd $working_directory
+        rm -rf output/
+        rm -rf config.json
+        
+    - name: Checkout gh-pages for history
+      uses: actions/checkout@v4
+      if: always()
+      continue-on-error: true
+      with:
+        ref: gh-pages
+        path: gh-pages
+          
+    - name: Upload Allure Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: allure-reports
+        path: allure-report/
+        retention-days: 30
+        
+
+    #- name: Deploy history to gh-pages
+    #  uses: peaceiris/actions-gh-pages@v4
+    #  if: always()
+    #  with:
+    #    github_token: ${{ secrets.GITHUB_TOKEN }}
+    #    publish_dir: gh-pages/main/
+    #    publish_branch: gh-pages
+    #    destination_dir: main
+    #    keep_files: true
+    #    force_orphan: false
+        
+    - name: Commit files
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: Automated report update
