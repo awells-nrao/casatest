@@ -97,16 +97,16 @@ jobs:
         retention-days: 30
         
 
-    #- name: Deploy history to gh-pages
-    #  uses: peaceiris/actions-gh-pages@v4
-    #  if: always()
-    #  with:
-    #    github_token: ${{ secrets.GITHUB_TOKEN }}
-    #    publish_dir: gh-pages/main/
-    #    publish_branch: gh-pages
-    #    destination_dir: main
-    #    keep_files: true
-    #    force_orphan: false
+    - name: Deploy report to gh-pages
+      uses: peaceiris/actions-gh-pages@v4
+      if: always()
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: allure-report
+        publish_branch: gh-pages
+        destination_dir: main
+        keep_files: true
+        force_orphan: false
         
     - name: Commit files
       uses: stefanzweifel/git-auto-commit-action@v5
