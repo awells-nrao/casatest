@@ -1,7 +1,4 @@
 # Base dependencies
-os
-sys
-json
 requests
 tarfile
 pathlib
