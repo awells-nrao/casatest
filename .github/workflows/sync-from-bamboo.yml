@@ -11,7 +11,7 @@ on:
   workflow_dispatch: # Allows manual trigger from UI
 
 jobs:
-  integration-tests:
+  report-generator:
     runs-on: ubuntu-latest
     
     steps:
@@ -67,7 +67,8 @@ jobs:
         cd $working_directory
         cd output/reports
         for dir in CASA-REMTA-* ; do
-            cd "Generating Sub Report for: $dir"
+            echo "Generating Sub Report for: $dir"
+            cd "$dir"
             allure generate allure-results --output "$working_directory/output/allure-report/$dir" --config $working_directory/config.json
             cd ..
             latest_report="$working_directory/output/allure-report/$dir"
