@@ -1,1 +1,1 @@
-{"id":"814e157371ad7bb6564fd2357497c21c","fullName":"test_task_getephemtable.getephemtable_test#test_save_rawdata","name":"test_save_rawdata","status":"passed","testResultsByEnv":{"default":"165d28255c8a418f42a17792a1cb9816"}}
+{"id":"814e157371ad7bb6564fd2357497c21c","fullName":"test_task_getephemtable.getephemtable_test#test_save_rawdata","name":"test_save_rawdata","status":"failed","testResultsByEnv":{"default":"c97b935a4bd7c71204423456d9c7c6c7"}}
